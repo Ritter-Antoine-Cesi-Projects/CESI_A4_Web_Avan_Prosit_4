@@ -7,6 +7,10 @@ Ce projet simule un système de capteurs connectés avec une architecture micros
 - **backend** : API Node.js/Express qui stocke les données dans MongoDB.
 - **frontend** : interface web pour visualiser les données en temps réel.
 
+### Aperçu de l’interface frontend
+
+![Aperçu du frontend](assets/frontend_demo.png)
+
 ## Démarrage rapide
 
 ### Prérequis
