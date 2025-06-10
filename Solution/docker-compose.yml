@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  mongodb_sensors:
+    image: mongo:latest
+    container_name: mongodb_sensors
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_sensors_data:/data/db
+
+  sensor1:
+    build: ./sensor
+    container_name: sensor1
+    environment:
+      - SENSOR_ID=1
+      - SERVER_URL=http://server:3000/data
+
+  sensor2:
+    build: ./sensor
+    container_name: sensor2
+    environment:
+      - SENSOR_ID=2
+      - SERVER_URL=http://server:3000/data
+
+  server:
+    build: ./backend
+    container_name: server
+    ports:
+      - "3000:3000"
+    environment:
+      - MONGO_URI=mongodb://mongodb_sensors:27017/sensors
+    depends_on:
+      - mongodb_sensors
+
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    ports:
+      - "3001:3001"
+    depends_on:
+      - server
+
+volumes:
+  mongodb_sensors_data:
