@@ -8,17 +8,38 @@ const MONGO_URI = process.env.MONGO_URI;
 
 mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
 
-const Data = mongoose.model('Data', {
+const Data = mongoose.model('Data', new mongoose.Schema({
   sensorId: Number,
-  value: Number,
+  name: mongoose.Schema.Types.Mixed,
+  metricsPollution: mongoose.Schema.Types.Mixed,
+  flux: Number,
   timestamp: { type: Date, default: Date.now }
-});
+}));
 
 app.use(bodyParser.json());
 
 app.post('/data', async (req, res) => {
-  const data = new Data(req.body);
-  await data.save();
+  const { sensorId, name, metricsPollution, flux, timestamp } = req.body;
+
+  // Si metricsPollution est un tableau, découpe chaque valeur
+  if (Array.isArray(metricsPollution)) {
+    const entries = metricsPollution.map(mp => {
+      // Si mp est un objet avec value, sinon c'est un nombre
+      const value = typeof mp === 'object' && mp !== null ? mp.value : mp;
+      return {
+        sensorId,
+        name,
+        metricsPollution: value,
+        flux,
+        timestamp
+      };
+    });
+    await Data.insertMany(entries);
+  } else {
+    // Cas normal, insertion unique
+    const data = new Data(req.body);
+    await data.save();
+  }
   res.sendStatus(200);
 });
 
